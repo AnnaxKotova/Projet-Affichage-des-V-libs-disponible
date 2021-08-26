@@ -12,6 +12,20 @@ try{
 
 //ECRIRE LE CODE ICI
 //Insertion de données
+$allStations = getAllCodeVelibStationFromBDD($bdd); //bdd - c'est notre base de données créer par Paris
+
+foreach($allStations as $key => $value) //dealing with an array associatif
+{
+    $codeStation = $value['code_station']; //récuperation d'un numéro de station
+
+   $data = getJsonFromAPI($codeStation); //transformation sur le texte
+
+   setVelibData($bdd, $codeStation, $data); //téléchargement dans le tableau dispo
+
+   //VOILA ! ! !
+}
+
+
 
 
 //Récupération de la donnée
@@ -25,7 +39,9 @@ try{
     @pdo object : variable où l'on a initialisé la base de données
 */
 function getAllCodeVelibStationFromBDD($pdo){
-    $requete = "SELECT `code_station` FROM `stations`;";
+    $requete = "SELECT `code_station`
+    FROM stations LEFT JOIN `dispo`
+    ON `code_station` = `codeStation_dispo`"; //voici left join car là on recupère que les numéros de stations
     $sql = $pdo->prepare($requete);
     $sql->execute();
     if($sql->errorInfo()[0] != 00000 ){
@@ -34,15 +50,15 @@ function getAllCodeVelibStationFromBDD($pdo){
     return $sql->fetchAll(PDO::FETCH_ASSOC);
 }
 
-
-
 /*
     Récupération d'une station de Vélib avec les données de disponnibilités
     @pdo object : variable où l'on a initialisé la base de données
 */
 function getOneVelibStationFromBDD($pdo, $codeStation){
-    $requete = "SELECT `:codeStation` FROM `stations`
-    WHERE `:codeStation` = `code_station`;";
+    $requete = "SELECT `code_station`
+    FROM `stations` RIGHT JOIN `dispo`
+    ON `code_station` = `codeStation_dispo`
+    WHERE code_station = :codeStation;"; //car la fonction asks for une seule station
     $sql = $pdo->prepare($requete);
     $sql->bindValue(':codeStation', $codeStation, PDO::PARAM_INT);
     $sql->execute();
@@ -59,7 +75,15 @@ function getOneVelibStationFromBDD($pdo, $codeStation){
     @pdo object : variable où l'on a initialisé la base de données
 */
 function getAllVelibStationFromBDD($pdo, $codeStation){
-    $requete = "SELECT `code_station`, `ouvert_dispo`, `evelo_dispo`, `velo_dispo`, `total_dispo`, `capacite_dispo` FROM `stations` LEFT JOIN `dispo` ON `code_station` = `codeStation_dispo`";
+    $requete = "SELECT `code_station`,
+    `ouvert_dispo`,
+    `evelo_dispo`,
+    `velo_dispo`,
+    `total_dispo`,
+    `capacite_dispo`
+    FROM `stations` RIGHT JOIN `dispo`
+    ON `code_station` = `codeStation_dispo`";
+    //ici right join car on est besoin de disponibilité
     $sql = $pdo->prepare($requete);
     $sql->execute();
     if($sql->errorInfo()[0] != 00000 ){
@@ -75,10 +99,14 @@ function getAllVelibStationFromBDD($pdo, $codeStation){
 function setVelibData($pdo, $codeStation, $data){
 
     if(getOneVelibStationFromBDD($pdo, $codeStation)){
-        $requeteUpdate = "SELECT `code_station`, `ouvert_dispo`, `evelo_dispo`, `velo_dispo`, `total_dispo`, `capacite_dispo`
-        FROM `stations` LEFT JOIN `dispo`
-        ON `code_station` = `codeStation_dispo`
-        WHERE `code_station` = `:codeStation`, `:ouvert_dispo` = `ouvert_dispo`, `:evelo_dispo` = `evelo_dispo`, `:velo_dispo` = `velo_dispo`, `:total_dispo` = `total_dispo`, `:capacite_dispo` = `capacite_dispo`;";
+        $requeteUpdate = "UPDATE `dispo` SET
+        -- `code_station` =  :codeStation, on n'a pas besoin car on l'a met dans WHERE
+        `ouvert_dispo` = :ouvert_dispo,
+        `evelo_dispo` = :evelo_dispo,
+        `velo_dispo` = :velo_dispo,
+        `total_dispo` = :total_dispo,
+        `capacite_dispo` = :capacite_dispo
+        WHERE `codeStation_dispo` = :codeStation;";
         $sqlUpdate = $pdo->prepare($requeteUpdate);
         $sqlUpdate->bindValue(':ouvert_dispo', checkIfOpenStation($data->is_renting), PDO::PARAM_INT);
         $sqlUpdate->bindValue(':evelo_dispo', $data->ebike, PDO::PARAM_INT);
@@ -90,15 +118,18 @@ function setVelibData($pdo, $codeStation, $data){
         if($sqlUpdate->errorInfo()[0] != 00000 ){
             print_r($sqlUpdate->errorInfo());
         }
-    } else {
-        $requeteInsert = "";
+    } else { //ajout si le tableau est vide
+        $requeteInsert = "INSERT INTO `dispo` (`codeStation_dispo`, `ouvert_dispo`, `evelo_dispo`, `velo_dispo`, `total_dispo`, `capacite_dispo`) VALUES (:codeStation, :ouvert_dispo, :evelo_dispo, :velo_dispo, :total_dispo, :capacite_dispo);";
+        // pas de guimmets ici avant :
         $sqlInsert = $pdo->prepare($requeteInsert);
+        $sqlInsert->bindValue(':codeStation', $codeStation, PDO::PARAM_INT);
+
         $sqlInsert->bindValue(':ouvert_dispo', checkIfOpenStation($data->is_renting), PDO::PARAM_INT);
+
         $sqlInsert->bindValue(':evelo_dispo', $data->ebike, PDO::PARAM_INT);
         $sqlInsert->bindValue(':velo_dispo', $data->mechanical, PDO::PARAM_INT);
         $sqlInsert->bindValue(':total_dispo', $data->numbikesavailable, PDO::PARAM_INT);
         $sqlInsert->bindValue(':capacite_dispo', $data->capacity, PDO::PARAM_INT);
-        $sqlInsert->bindValue(':codeStation', $codeStation, PDO::PARAM_INT);
         $sqlInsert->execute();
         if($sqlInsert->errorInfo()[0] != 00000 ){
             print_r($sqlInsert->errorInfo());
