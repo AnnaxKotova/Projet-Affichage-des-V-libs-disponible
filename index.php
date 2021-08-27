@@ -14,11 +14,12 @@
 <body>
     <div class=container>
         <div class="carte">
+
             <div id="vel17033" class="caseVelo"></div>
             <div id="vel8056" class="caseVelo"></div>
             <div id="vel8057" class="caseVelo"></div>
             <div id="vel8028" class="caseVelo"></div>
-            <div id="vel8003" class="caseVelo"></div>
+            <div id="vel8003" class="caseVelo"><?php echo $totalDispo8003?></div>
             <div id="vel16001" class="caseVelo"></div>
             <div id="vel16103" class="caseVelo"></div>
         </div>
@@ -112,22 +113,22 @@
             </div>
             <div id="infos8003" class="infosVelo">
             <div class="identificationStation">
-                    <div class="name"></div>
-                    <div class="code"></div>
+                    <div class="name"><?php echo $nom_station8003?></div>
+                    <div class="code"><?php echo $codeStation_dispo8003?></div>
                 </div>
 
                 <div class="disponibilite">
                     <div class="nbVelosTotal">
                         <img src="img/total.png" alt="total" class='picto'>
-                        <span></span>
+                        <span><?php echo $totalDispo8003?></span>
                     </div>
                     <div class="nbVelosMecanique">
                         <img src="img/bike.png" alt="bike" class='picto'>
-                        <span></span>
+                        <span><?php echo $veloDispo8003?></span>
                     </div>
                     <div class="nbVelosElectric">
                         <img src="img/ebike.png" alt="ebike" class='picto'>
-                        <span></span>
+                        <span><?php echo $eveloDispo8003?></span>
                     </div>
                 </div>
             </div>

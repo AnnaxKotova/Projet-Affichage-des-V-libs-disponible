@@ -20,17 +20,57 @@ foreach($allStations as $key => $value) //dealing with an array associatif
 
    $data = getJsonFromAPI($codeStation); //transformation sur le texte
 
+//    print_r($codeStation);
    setVelibData($bdd, $codeStation, $data); //téléchargement dans le tableau dispo
 
    //VOILA ! ! !
 }
 
 
-
-
 //Récupération de la donnée
+// function insertData($codeStation){
 
 
+
+$station8003 = getOneVelibStationFromBDD($bdd, 8003);
+$nom_station8003 = $station8003['nom_station'];
+$codeStation_dispo8003 = $station8003['codeStation_dispo'];
+$totalDispo8003 = $station8003['total_dispo'];
+$eveloDispo8003 = $station8003['evelo_dispo'];
+$veloDispo8003 = $station8003['velo_dispo'];
+// print_r($station8003);
+
+
+// foreach($dataStation as $key =>$value){
+
+
+
+// $allStations = getAllCodeVelibStationFromBDD($bdd); //bdd - c'est notre base de données créer par Paris
+
+// foreach($allStations as $key => $value) //dealing with an array associatif
+// {
+    // $codeStation = $value['code_station'];
+
+    $dataStations = getAllVelibStationFromBDD($bdd, $codeStation);
+    foreach($dataStations as $key => $value){
+            // print_r($dataStations[$i]); //Array ( [code_station] => 17033 [ouvert_dispo] => 0 [evelo_dispo] => 0 [velo_dispo] => 0 [total_dispo] => 0 [capacite_dispo] => 33 )
+            $value['code_station'];
+            print_r($dataStations[$codeStation]);
+
+
+    // foreach($dataStations[$i] as $key => $value){
+    //     $nom_station[$i] = $dataStations[$i]['nom_station'];
+    //     $code_station[$i] = $dataStations[$i]['code_station'];
+    //     $ouvert_dispo[$i] = $dataStations[$i]['ouvert_dispo'];
+    //     $evelo_dispo[$i] = $dataStations[$i]['evelo_dispo'];
+    //     $velo_dispo[$i] = $dataStations[$i]['velo_dispo'];
+    //     $total_dispo[$i] = $dataStations[$i]['total_dispo'];
+    //     }
+    }
+
+    // print_r($total_dispo[5]); //mais dans ce cas la on est besoin de numero de station
+
+    //normalement on est besoin 
 
 
 //FONCTIONS
@@ -53,9 +93,12 @@ function getAllCodeVelibStationFromBDD($pdo){
 /*
     Récupération d'une station de Vélib avec les données de disponnibilités
     @pdo object : variable où l'on a initialisé la base de données
+
+    là on est besoin de recuperer touts les données car on les a besoin pour les afficher
 */
 function getOneVelibStationFromBDD($pdo, $codeStation){
-    $requete = "SELECT `code_station`
+    $requete = "SELECT `nom_station`, `codeStation_dispo`, `ouvert_dispo`, `evelo_dispo`, 
+    `velo_dispo`, `total_dispo`, `capacite_dispo`    
     FROM `stations` RIGHT JOIN `dispo`
     ON `code_station` = `codeStation_dispo`
     WHERE code_station = :codeStation;"; //car la fonction asks for une seule station
@@ -65,8 +108,11 @@ function getOneVelibStationFromBDD($pdo, $codeStation){
     if($sql->errorInfo()[0] != 00000 ){
         print_r($sql->errorInfo());
     }
-    return $sql->fetch(PDO::FETCH_ASSOC);
+    return $sql->fetch(PDO::FETCH_ASSOC); 
+    // rutourne que le 1er resultat
 }
+
+
 
 
 
@@ -75,7 +121,7 @@ function getOneVelibStationFromBDD($pdo, $codeStation){
     @pdo object : variable où l'on a initialisé la base de données
 */
 function getAllVelibStationFromBDD($pdo, $codeStation){
-    $requete = "SELECT `code_station`,
+    $requete = "SELECT `nom_station`, `code_station`,
     `ouvert_dispo`,
     `evelo_dispo`,
     `velo_dispo`,
