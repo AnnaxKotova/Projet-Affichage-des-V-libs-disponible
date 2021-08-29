@@ -32,7 +32,7 @@
         ?>
     </div>
     
-
+    <div class='infos' id='infos'>
     <?php
     foreach ($dataStations as $key => $value){
         $codeStation = $value['code_station'];
@@ -41,8 +41,7 @@
         $eveloDispo = $value['evelo_dispo'];
         $veloDispo = $value['velo_dispo'];
 
-        echo "<div class='infos' id='infos'>
-                <div id='infos{$codeStation}' class='infosVelo'>
+        echo "                <div id='infos{$codeStation}' class='infosVelo'>
                 <div class='identificationStation'>
                 <div class='name'>{$nomStation}</div>
             </div>
@@ -67,7 +66,7 @@
     }
     ?>
     </div>
-
+    </div>
     <script src="js/script.js"></script>
 </body>
 </html>

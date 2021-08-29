@@ -40,14 +40,10 @@ $veloDispo8003 = $station8003['velo_dispo'];
 // version normale
 
 $dataStations = getAllVelibStationFromBDD($bdd, $codeStation);
-// print_r($dataStations[0]['code_station']);
+// $dataStations[0]['code_station']; так тоже можно, работа с массивами массивов
 //array_column will flat array of arrays and return an array with data
 // $code_station = array_column($dataStations, 'code_station');
 
-// $nom_station = array_column($dataStations, 'nom_station');
-// $totalDispo = array_column($dataStations, 'total_dispo');
-// $eveloDispo = array_column($dataStations, 'evelo_dispo');
-// $veloDispo = array_column($dataStations, 'velo_dispo');
 
 foreach ($dataStations as $key => $value){
     $codeStation = $value['code_station'];
@@ -55,17 +51,9 @@ foreach ($dataStations as $key => $value){
     $totalDispo = $value['total_dispo'];
     $eveloDispo = $value['evelo_dispo'];
     $veloDispo = $value['velo_dispo'];
-
 }
+//ce loop va dans une page HTML pour générer les noms de divs
 
-
-
-
-// foreach ($nom_station as $value){
-//         echo "<div class='identificationStation'>
-//         <div class='name'>{$value}</div>
-//         </div>";
-// }
 
 
 
